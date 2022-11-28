@@ -1,11 +1,9 @@
 from socket import *
 
-serverAddress = ('140.118.145.198', 5000)
+serverAddress = ('140.118.145.184', 5000)
 clientSocket = socket(AF_INET, SOCK_STREAM)
 clientSocket.connect(serverAddress)
-
-# Receive server's reply
-print(clientSocket.recv(1024).decode())
+print(clientSocket.recv(1024).decode())  # Receive server's reply
 
 while True:
 
