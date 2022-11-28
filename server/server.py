@@ -129,44 +129,44 @@ def eval_postfix(postfix: list):
     return str(round(stack[0], 3)) if isinstance(stack[0], float) else str(stack[0])  # 3 decimal places
 
 
-serverAddress = ('140.118.145.198', 5000)
+serverAddress = ('140.118.145.184', 5000)
 serverSocket = socket(AF_INET, SOCK_STREAM)
 serverSocket.bind(serverAddress)
-
 serverSocket.listen(1)  # Listen to 1 client at most
-print("\nServer is listening...")
-
-connectionSocket, clientAddress = serverSocket.accept()
-connectionSocket.send("\nHello, Client!".encode())
 
 while True:
+    print("\nServer is listening...")
+    connectionSocket, clientAddress = serverSocket.accept()
+    connectionSocket.send("\nHello, Client!".encode())
 
     mode = connectionSocket.recv(1024).decode()
 
-    if mode == 'q':
-        connectionSocket.send("Bye, Client! Connection Closed.".encode())
-        break
-
-    print("Mode: " + mode)
-
-    while mode == '1':
-        exp = connectionSocket.recv(1024).decode()
-        if exp == 'q':
+    while mode:
+        if mode == 'q':
+            connectionSocket.send("Bye, Client! Connection Closed.".encode())
+            connectionSocket.close()
+            print("Client exited.\n")
             break
-        answer = eval_postfix(to_postfix(exp)) if is_valid_expr(exp) else "Invalid Expression."
-        connectionSocket.send(answer.encode())
 
-    ans_file = open("Ans.txt", 'w')
-    while mode == '2':
-        exp = connectionSocket.recv(1024).decode()
-        if exp == 'q':
-            break  # Exit the mode
+        print("Mode: " + mode)
 
-        answer = eval_postfix(to_postfix(exp)) if is_valid_expr(exp) else "Invalid Expression."
-        ans_file.write(answer + '\n')
-        connectionSocket.send(answer.encode())
+        while mode == '1':
+            exp = connectionSocket.recv(1024).decode()
+            if exp == 'q':
+                break
+            answer = eval_postfix(to_postfix(exp)) if is_valid_expr(exp) else "Invalid Expression."
+            connectionSocket.send(answer.encode())
 
-    ans_file.close()
-    print("-----------------------------------\nExited the mode.\n")
+        ans_file = open("Ans.txt", 'w')
+        while mode == '2':
+            exp = connectionSocket.recv(1024).decode()
+            if exp == 'q':
+                break  # Exit the mode
 
-connectionSocket.close()
+            answer = eval_postfix(to_postfix(exp)) if is_valid_expr(exp) else "Invalid Expression."
+            ans_file.write(answer + '\n')
+            connectionSocket.send(answer.encode())
+        ans_file.close()
+
+        print("-----------------------------------\nExited the mode.\n")
+        mode = connectionSocket.recv(1024).decode()
